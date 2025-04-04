@@ -1,15 +1,15 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 const axios = require("axios");
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get("/", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
+      executablePath: "/usr/bin/google-chrome", // Puppeteer dùng Chrome có sẵn trên Render
       headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], // bắt buộc với Render
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
@@ -20,21 +20,18 @@ app.get("/", async (req, res) => {
       timeout: 60000,
     });
 
-    // Đợi trang load đầy đủ dữ liệu bảng
     await page.waitForTimeout(8000);
 
     const buffer = await page.screenshot({ fullPage: true });
 
-    // Gửi ảnh về server PHP của anh Phong
-    const uploadUrl = "https://TENMIENCUAANH.COM/upload-image.php"; // 👈 Sửa lại domain anh nhé
-    const response = await axios.post(uploadUrl, buffer, {
+    await axios.post("https://TENMIENCUAANH.COM/upload-image.php", buffer, {
       headers: { "Content-Type": "application/octet-stream" },
     });
 
     await browser.close();
-    res.send(`✅ Chụp ảnh thành công! Link ảnh: ${response.data.link}`);
+    res.send("✅ Chụp ảnh và gửi thành công!");
   } catch (error) {
-    res.status(500).send("❌ Lỗi khi chụp ảnh: " + error.message);
+    res.status(500).send("❌ Lỗi: " + error.message);
   }
 });
 
