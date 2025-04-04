@@ -1,13 +1,14 @@
 const express = require("express");
 const puppeteer = require("puppeteer-core");
 const axios = require("axios");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get("/", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
-      executablePath: "/usr/bin/google-chrome", // Puppeteer dùng Chrome có sẵn trên Render
+      executablePath: "/usr/bin/google-chrome",
       headless: "new",
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
