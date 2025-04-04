@@ -1,5 +1,7 @@
+process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = false;
+
 const express = require("express");
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
 const axios = require("axios");
 
 const app = express();
@@ -8,7 +10,6 @@ const PORT = process.env.PORT || 3000;
 app.get("/", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
-      executablePath: "/usr/bin/google-chrome",
       headless: "new",
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
@@ -30,9 +31,9 @@ app.get("/", async (req, res) => {
     });
 
     await browser.close();
-    res.send("✅ Chụp ảnh và gửi thành công!");
+    res.send("✅ Đã chụp ảnh và gửi về server thành công!");
   } catch (error) {
-    res.status(500).send("❌ Lỗi: " + error.message);
+    res.status(500).send("❌ Lỗi khi chạy Puppeteer: " + error.message);
   }
 });
 
