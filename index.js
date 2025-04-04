@@ -7,7 +7,11 @@ const PORT = process.env.PORT || 3000;
 
 app.get("/", async (req, res) => {
   try {
-    const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // bắt buộc với Render
+    });
+
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 4000 });
 
@@ -16,17 +20,21 @@ app.get("/", async (req, res) => {
       timeout: 60000,
     });
 
+    // Đợi trang load đầy đủ dữ liệu bảng
     await page.waitForTimeout(8000);
+
     const buffer = await page.screenshot({ fullPage: true });
 
-    await axios.post("https://TENMIENCUAPHONG.com/upload-image.php", buffer, {
+    // Gửi ảnh về server PHP của anh Phong
+    const uploadUrl = "https://TENMIENCUAANH.COM/upload-image.php"; // 👈 Sửa lại domain anh nhé
+    const response = await axios.post(uploadUrl, buffer, {
       headers: { "Content-Type": "application/octet-stream" },
     });
 
     await browser.close();
-    res.send("✅ Đã chụp và gửi ảnh thành công!");
-  } catch (err) {
-    res.status(500).send("❌ Lỗi: " + err.message);
+    res.send(`✅ Chụp ảnh thành công! Link ảnh: ${response.data.link}`);
+  } catch (error) {
+    res.status(500).send("❌ Lỗi khi chụp ảnh: " + error.message);
   }
 });
 
