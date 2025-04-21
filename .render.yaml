@@ -1,10 +1,7 @@
 services:
   - type: web
-    name: iboard-capture
+    name: cafef-screenshot
     env: node
-    buildCommand: npm install
-    startCommand: node index.js
     plan: free
-    envVars:
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: "false"
+    buildCommand: npm install
+    startCommand: npm start
