@@ -1,49 +1,37 @@
+import express from 'express';
+import puppeteer from 'puppeteer';
+import fs from 'fs';
 
-process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = false;
-
-const express = require("express");
-const puppeteer = require("puppeteer");
-const fs = require("fs");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-app.get("/", async (req, res) => {
+app.get('/screenshot', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      headless: true,
+      args: ['--no-sandbox']
     });
-
     const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 900 });
 
-    await page.goto("https://iboard.ssi.com.vn", {
-      waitUntil: "networkidle2",
+    await page.goto('https://cafef.vn/du-lieu.chn', {
+      waitUntil: 'networkidle2',
       timeout: 60000
     });
 
-    await page.waitForSelector("#btnExportPriceboard", { timeout: 10000 });
-    await page.click("#btnExportPriceboard");
+    await page.waitForTimeout(5000);
 
-    await page.waitForTimeout(4000); // Chờ tải về xong
-
-    const csvContent = await page.evaluate(() => {
-      return document.querySelector("body").innerText;
-    });
-
-    const fileName = "/tmp/iboard-data.csv";
-    fs.writeFileSync(fileName, csvContent);
-
-    const fileData = fs.readFileSync(fileName);
-    res.setHeader("Content-Disposition", "attachment; filename=iboard-data.csv");
-    res.setHeader("Content-Type", "text/csv");
-    res.send(fileData);
-
+    const screenshotBuffer = await page.screenshot({ fullPage: true });
     await browser.close();
+
+    res.set('Content-Type', 'image/png');
+    res.send(screenshotBuffer);
   } catch (err) {
-    res.status(500).send("❌ Lỗi: " + err.message);
+    console.error(err);
+    res.status(500).send('Lỗi khi chụp ảnh.');
   }
 });
 
-app.listen(PORT, () => {
-  console.log("✅ Server đang chạy tại http://localhost:" + PORT);
+app.listen(port, () => {
+  console.log(`Server chạy tại http://localhost:${port}`);
 });
