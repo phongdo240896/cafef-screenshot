@@ -1,6 +1,5 @@
 import express from 'express';
 import puppeteer from 'puppeteer';
-import fs from 'fs';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -9,8 +8,12 @@ app.get('/screenshot', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ]
     });
+
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 900 });
 
@@ -21,11 +24,11 @@ app.get('/screenshot', async (req, res) => {
 
     await page.waitForTimeout(5000);
 
-    const screenshotBuffer = await page.screenshot({ fullPage: true });
+    const buffer = await page.screenshot({ fullPage: true });
     await browser.close();
 
-    res.set('Content-Type', 'image/png');
-    res.send(screenshotBuffer);
+    res.setHeader('Content-Type', 'image/png');
+    res.send(buffer);
   } catch (err) {
     console.error(err);
     res.status(500).send('Lỗi khi chụp ảnh.');
@@ -33,5 +36,5 @@ app.get('/screenshot', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server chạy tại http://localhost:${port}`);
+  console.log(`✅ Server is running on port ${port}`);
 });
