@@ -1,15 +1,4 @@
-{
-  "name": "cafef-screenshot",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "puppeteer": "^21.3.8"
-  },
-  "puppeteer": {
-    "skipDownload": true
-  }
+"dependencies": {
+  "puppeteer": "^21.3.8",
+  "express": "^4.18.2"
 }
