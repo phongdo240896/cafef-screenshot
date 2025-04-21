@@ -1,40 +1,31 @@
-import express from 'express';
-import puppeteer from 'puppeteer';
+const express = require('express');
+const puppeteer = require('puppeteer');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 app.get('/screenshot', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox'
-      ]
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 900 });
+    await page.goto('https://cafef.vn/du-lieu.chn', { waitUntil: 'networkidle2' });
 
-    await page.goto('https://cafef.vn/du-lieu.chn', {
-      waitUntil: 'networkidle2',
-      timeout: 60000
-    });
+    const screenshot = await page.screenshot({ fullPage: true });
 
-    await page.waitForTimeout(5000);
-
-    const buffer = await page.screenshot({ fullPage: true });
     await browser.close();
 
-    res.setHeader('Content-Type', 'image/png');
-    res.send(buffer);
+    res.set('Content-Type', 'image/png');
+    res.send(screenshot);
   } catch (err) {
-    console.error(err);
+    console.error('Lỗi chụp ảnh:', err);
     res.status(500).send('Lỗi khi chụp ảnh.');
   }
 });
 
-app.listen(port, () => {
-  console.log(`✅ Server is running on port ${port}`);
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}`);
 });
